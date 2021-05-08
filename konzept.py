@@ -9,6 +9,7 @@ lm_eps = {"AN":36.64, "DCM": 8.93}
 sigma = [4.94, 1.26]
 c0 = [1, 0.002, 0.00007]
 cs = []
+base = []
 
 for c in c0:
     expo = np.floor(np.log10(c))-2
@@ -16,7 +17,9 @@ for c in c0:
     a = np.linspace(c-x, c+x,num=21, endpoint=True)
     a = np.round(a, int(2-expo))
     cs.extend(a)
-
+    for val in a:
+        base.append([c, val])
+base = pd.DataFrame(base, columns=["base", "c"]).set_index("c")
 
 values=[]
 for (lm,eps) in lm_eps.items():
@@ -24,21 +27,9 @@ for (lm,eps) in lm_eps.items():
         wert = msa(rhomol, eps, sigma)
         values.append([lm, rhomol, wert])
 
-# values=[]
-# # Gehe rekursiv durch alle Ordner in "experimente"
-# for lm in os.scandir("experimente"):
-#     if lm.is_dir():
-#         for c in os.scandir(lm.path):
-#             if c.is_dir:
-#                 # Öffne die Ergebnis-Datei und schreibe die Werte in values
-#                 file = open(c.path+"/values.8", 'r') # values.8 noch anpassen!
-#                 val = float(list(file)[3]) # richtige Zeile (ab 0 zählen)
-#                 values.append([lm.name, c.name, val])
-
 test = pd.DataFrame(values, columns=["Lösungsmittel", "c", "Ergebnis"])
-print(test)
 
-spalten = []
+spalten = [base]
 for lm in test["Lösungsmittel"].unique():
     an = test[test["Lösungsmittel"]==lm]
     an = an[["c", "Ergebnis"]] # Beschränkt die Spalten
